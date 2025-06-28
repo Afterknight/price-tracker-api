@@ -1,10 +1,10 @@
-# main.py
-
 # 1. Import necessary libraries
+from fastapi.responses import RedirectResponse 
+import re
 from fastapi import FastAPI, HTTPException
 import requests
 from bs4 import BeautifulSoup
-import re # Import regular expressions for cleaning
+import re 
 
 # 2. Create a FastAPI app instance
 app = FastAPI(
@@ -23,25 +23,21 @@ async def get_product_details(url: str):
     if not url:
         raise HTTPException(status_code=400, detail="URL parameter is required.")
 
-    # Headers to mimic a real browser visit
+    
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
     }
 
     try:
-        # 4. Fetch the webpage content
+        
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
+        response.raise_for_status() 
 
         # 5. Parse the HTML with BeautifulSoup
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # 6. Extract the data using CSS selectors
-        #   DISCLAIMER: These selectors are specific to Amazon and WILL change over time.
-        #   The core skill is learning to find the new ones using browser DevTools.
-
-        # Find the product title
+        # 6. Extract product details
         product_title_element = soup.select_one('span#productTitle')
         product_title = product_title_element.get_text().strip() if product_title_element else "Title not found"
 
@@ -82,7 +78,7 @@ async def get_product_details(url: str):
         # A catch-all for parsing errors or other unexpected issues
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
-# A simple root endpoint to confirm the API is running
+# A simple root endpoint to REDIRECT to the documentation
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the Product Price Tracker API! Go to /docs for more info."}
+    return RedirectResponse(url="/docs")
